@@ -21,13 +21,16 @@ while true; do
 			cd ..
 
 			# run PHPDocumentor and generate .MD files
+			# (generate into a "phpdoc" directory so we don't accidently 
+			# overwrite other documentation)
 			phpdoc -d $github_repo -t docs/ --template="xml"
 			chmod -R 777 "$github_repo.wiki"
-			rm -r "$github_repo.wiki/*"
-			phpdoc-md/bin/phpdocmd docs/structure.xml "$github_repo.wiki"
+			mkdir -p "$github_repo.wiki/phpdoc"
+			rm -r "$github_repo.wiki/phpdoc/*"
+			phpdoc-md/bin/phpdocmd docs/structure.xml "$github_repo.wiki/phpdoc"
 
-			# switch to the Wiki repo dir
-			cd "$github_repo.wiki"
+			# switch to the Wiki repo documentation dir
+			cd "$github_repo.wiki/phpdoc"
 
 			# remove the .MD extension from URLs so GitHub links them correctly
 			sed -i '' 's/.md)/)/g' *.md
