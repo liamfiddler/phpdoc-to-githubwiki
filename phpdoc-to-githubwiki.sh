@@ -1,5 +1,17 @@
 #!/bin/bash
 
+if ! type "php" > /dev/null; then
+    echo "PHP not found!" 1>&2
+    echo "Please follow the install instructions at http://php.net/ then try again" 1>&2
+    exit
+fi
+
+if ! type "git" > /dev/null; then
+    echo "Git not found!" 1>&2
+    echo "Please follow the install instructions at https://git-scm.com/ then try again" 1>&2
+    exit
+fi
+
 while true; do
 	read -e -p "GitHub username: " github_username
 	read -e -p "GitHub repository: " github_repo
@@ -21,9 +33,16 @@ while true; do
 			cd ..
 
 			# run PHPDocumentor and generate .MD files
-			# (generate into a "phpdoc" directory so we don't accidently 
-			# overwrite other documentation)
-			phpdoc -d $github_repo -t docs/ --template="xml"
+			if ! type "phpdoc" > /dev/null; then
+				echo "Global PHPDocumentor not found, downloading local PHAR..."
+				curl -sS https://www.phpdoc.org/phpDocumentor.phar > phpdoc.phar
+				php ./phpdoc.phar -d $github_repo -t docs/ --template="xml"
+			else
+				phpdoc -d $github_repo -t docs/ --template="xml"
+			fi
+
+			# generate into a "phpdoc" directory so we don't accidently 
+			# overwrite other documentation
 			chmod -R 777 "$github_repo.wiki"
 			mkdir -p "$github_repo.wiki/phpdoc"
 			rm -r "$github_repo.wiki/phpdoc/*"
